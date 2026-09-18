@@ -51,6 +51,13 @@ _AXIS_ROW_HEIGHT: int = 34
 # a large enough target to hover for a tooltip.
 _STROKE_WIDTH: float = 1.5
 
+# Standard grid line styling for well log tracks.
+# Well logs require crisp, visible grid lines so petrophysicists can read values
+# and correlate bed boundaries across all tracks at exact depths.
+GRID_COLOR: str = "#D0D0D0"
+GRID_OPACITY: float = 0.65
+GRID_WIDTH: float = 1.0
+
 
 def build_track_view(
     track: TrackPlot,
@@ -75,11 +82,11 @@ def build_track_view(
     if not track.curves:
         raise ValueError(f"Track {track.number} has no curves to draw.")
 
-    # Which layer owns the depth axis: the first one, when this track shows it
-    # at all. Chosen by position rather than by curve because any layer can
-    # draw it — they all share the same depth scale.
-    depth_axis_owner = 0 if show_depth_axis else None
-
+    # Every track's first layer (index 0) owns its depth axis. When
+    # show_depth_axis is True (the leftmost track), it draws full labels and
+    # title. On other tracks, it draws a grid-only axis so that horizontal
+    # depth grid lines extend continuously across all three tracks.
+    #
     # A track may carry curves on different scales — gamma ray 0-150 beside
     # spontaneous potential -80 to 20 — and each needs its own header. Curves
     # that share a scale exactly, as the three resistivity curves do, share one
@@ -93,7 +100,8 @@ def build_track_view(
             depth_max=depth_max,
             depth_units=depth_units,
             header=headers[index],
-            owns_depth_axis=index == depth_axis_owner,
+            owns_depth_axis=index == 0,
+            show_depth_labels=show_depth_axis if index == 0 else False,
             zoom_param=zoom_param if index == 0 else None,
         )
         for index, curve in enumerate(track.curves)
@@ -166,6 +174,7 @@ def _curve_layer(
     depth_units: str,
     header: tuple[int, str] | None,
     owns_depth_axis: bool,
+    show_depth_labels: bool,
     zoom_param: str | None,
 ) -> dict[str, Any]:
     """One curve: a clipped line, its own value scale, and a depth encoding."""
@@ -187,7 +196,9 @@ def _curve_layer(
         },
         "encoding": {
             "x": _value_encoding(curve, header),
-            "y": _depth_encoding(depth_min, depth_max, depth_units, owns_depth_axis),
+            "y": _depth_encoding(
+                depth_min, depth_max, depth_units, owns_depth_axis, show_depth_labels
+            ),
             # A well log is a line plotted against the VERTICAL axis, which is
             # the reverse of almost every chart Vega-Lite is asked to draw. Left
             # alone it sorts the points of a line by the x channel, so the curve
@@ -261,7 +272,9 @@ def _value_encoding(
         # axis is left to place its own.
         **({} if curve.scale_type is ScaleType.LOGARITHMIC else {"tickCount": 4}),
         "grid": True,
-        "gridOpacity": 0.25,
+        "gridColor": GRID_COLOR,
+        "gridOpacity": GRID_OPACITY,
+        "gridWidth": GRID_WIDTH,
     }
     return encoding
 
@@ -271,12 +284,14 @@ def _depth_encoding(
     depth_max: float,
     depth_units: str,
     owns_axis: bool,
+    show_labels: bool = True,
 ) -> dict[str, Any]:
     """The depth scale, identical on every layer of every track.
 
-    Every layer carries the scale; at most one carries the axis. Dropping the
-    scale from the non-owning layers would let them auto-fit to their own data
-    and the curves would no longer line up at the same depth.
+    Every layer carries the scale; at most one per track carries the axis.
+    Layer 0 of the first track renders the full labelled depth axis. Layer 0
+    of subsequent tracks renders a grid-only depth axis to ensure continuous
+    horizontal depth grid lines across the entire log display.
     """
     encoding: dict[str, Any] = {
         "field": DEPTH_FIELD,
@@ -293,14 +308,28 @@ def _depth_encoding(
         encoding["axis"] = None
         return encoding
 
-    encoding["axis"] = {
-        "title": f"Depth ({depth_units})",
-        "titleFontSize": 10,
-        "labelFontSize": 9,
-        "format": "d",
-        "grid": True,
-        "gridOpacity": 0.25,
-    }
+    if show_labels:
+        encoding["axis"] = {
+            "title": f"Depth ({depth_units})",
+            "titleFontSize": 10,
+            "labelFontSize": 9,
+            "format": "d",
+            "grid": True,
+            "gridColor": GRID_COLOR,
+            "gridOpacity": GRID_OPACITY,
+            "gridWidth": GRID_WIDTH,
+        }
+    else:
+        encoding["axis"] = {
+            "title": None,
+            "labels": False,
+            "ticks": False,
+            "domain": False,
+            "grid": True,
+            "gridColor": GRID_COLOR,
+            "gridOpacity": GRID_OPACITY,
+            "gridWidth": GRID_WIDTH,
+        }
     return encoding
 
 

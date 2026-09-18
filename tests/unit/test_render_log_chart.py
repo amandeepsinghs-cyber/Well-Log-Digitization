@@ -197,21 +197,62 @@ def test_exactly_one_zoom_parameter_in_the_whole_spec() -> None:
     assert params[0]["select"]["encodings"] == ["y"]
 
 
-def test_exactly_one_depth_axis_is_drawn_and_it_is_on_the_first_track() -> None:
-    """Every layer needs the depth SCALE; only one may declare the AXIS."""
+def test_depth_gridlines_drawn_across_all_tracks_and_labeled_on_first() -> None:
+    """Every track's layer 0 declares depth axis (for continuous gridlines),
+    while non-first tracks suppress labels/ticks/domain.
+    """
     spec = build_log_spec(build_log_plot(_three_track_document()))
 
     per_track = [
         [layer["encoding"]["y"].get("axis") for layer in child["layer"]]
         for child in spec["hconcat"]
     ]
-    assert sum(axis is not None for axes in per_track for axis in axes) == 1
+    assert sum(axis is not None for axes in per_track for axis in axes) == 3
+    # Track 1 has full axis with labels and title
     assert per_track[0][0] is not None
+    assert per_track[0][0].get("labels") is not False
+    assert per_track[0][0].get("title") is not None
+    assert per_track[0][0].get("grid") is True
+    # Tracks 2 and 3 have grid-only axis (labels=False, ticks=False, domain=False, grid=True)
+    for track_idx in (1, 2):
+        assert per_track[track_idx][0]["labels"] is False
+        assert per_track[track_idx][0]["ticks"] is False
+        assert per_track[track_idx][0]["domain"] is False
+        assert per_track[track_idx][0]["grid"] is True
 
     # The scale survives on every layer, or the curves stop lining up.
     for child in spec["hconcat"]:
         for layer in child["layer"]:
             assert layer["encoding"]["y"]["scale"]["reverse"] is True
+
+
+def test_spwla_standard_display_colors_and_styles() -> None:
+    """Curves must render with SPWLA standard colors and line styles."""
+    plot = build_log_plot(_three_track_document())
+    curves_by_name = {
+        c.mnemonic: c
+        for track in plot.tracks
+        for c in track.curves
+    }
+    # Track 1: GR green solid, SP red dashed
+    assert curves_by_name["GR"].colour == "#2E7D32"
+    assert curves_by_name["GR"].dash == ()
+    assert curves_by_name["SP"].colour == "#D32F2F"
+    assert curves_by_name["SP"].dash == (4, 2)
+
+    # Track 2: ILD red solid, ILM blue dashed, RXO black dotted
+    assert curves_by_name["ILD"].colour == "#D32F2F"
+    assert curves_by_name["ILD"].dash == ()
+    assert curves_by_name["ILM"].colour == "#1976D2"
+    assert curves_by_name["ILM"].dash == (6, 3)
+    assert curves_by_name["RXO"].colour == "#000000"
+    assert curves_by_name["RXO"].dash == (2, 2)
+
+    # Track 3: NPHI blue dashed, RHOB red solid (classic gas crossover)
+    assert curves_by_name["NPHI"].colour == "#1976D2"
+    assert curves_by_name["NPHI"].dash == (6, 3)
+    assert curves_by_name["RHOB"].colour == "#D32F2F"
+    assert curves_by_name["RHOB"].dash == ()
 
 
 def test_depth_axis_resolves_independently_within_a_track() -> None:

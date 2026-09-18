@@ -43,6 +43,30 @@ except ImportError:
 # different one and quietly move curves onto the wrong track.
 
 
+# SPWLA standard display palette for rendered well logs.
+# Paper scans historically printed curves in black ink or whatever pen was in
+# the plotter. For digital petrophysical presentation, SPWLA standard colours
+# and line styles are used:
+# - Track 1: GR (solid green), SP (red dashed), CALI (black dashed)
+# - Track 2: Deep resistivity ILD (solid red), Medium ILM (blue dashed),
+#            Shallow RXO (black dotted)
+# - Track 3: Porosity / Density: NPHI (dashed blue), RHOB (solid red)
+#            yielding the classic red/blue gas crossover, PEF (purple dashed),
+#            DT (cyan/blue solid)
+SPWLA_DISPLAY_PALETTE: dict[str, tuple[str, tuple[int, ...]]] = {
+    "GR": ("#2E7D32", ()),            # Green solid
+    "SP": ("#D32F2F", (4, 2)),         # Red dashed
+    "CALI": ("#000000", (4, 2)),       # Black dashed
+    "ILD": ("#D32F2F", ()),            # Deep resistivity: Red solid
+    "ILM": ("#1976D2", (6, 3)),        # Medium resistivity: Blue dashed
+    "RXO": ("#000000", (2, 2)),        # Shallow resistivity: Black dotted
+    "NPHI": ("#1976D2", (6, 3)),       # Neutron Porosity: Blue dashed
+    "RHOB": ("#D32F2F", ()),           # Bulk Density: Red solid
+    "PEF": ("#7B1FA2", (4, 2)),        # Photoelectric Factor: Purple
+    "DT": ("#0288D1", ()),             # Sonic: Cyan/Blue
+}
+
+
 def build_log_plot(document: LasDocument) -> LogPlot:
     """Group a LAS document's curves onto their conventional tracks.
 
@@ -61,13 +85,16 @@ def build_log_plot(document: LasDocument) -> LogPlot:
         if spec is None:
             # Not an error: a LAS may legitimately carry curves we do not draw.
             continue
+        display_colour, display_dash = SPWLA_DISPLAY_PALETTE.get(
+            spec.mnemonic, (spec.colour, spec.dash)
+        )
         by_track.setdefault(spec.track, []).append(
             CurvePlot(
                 mnemonic=spec.mnemonic,
                 unit=trace.unit or spec.unit,
                 description=spec.description,
-                colour=spec.colour,
-                dash=spec.dash,
+                colour=display_colour,
+                dash=display_dash,
                 scale_type=spec.scale_type,
                 display_min=spec.display_min,
                 display_max=spec.display_max,
