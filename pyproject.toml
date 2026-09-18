@@ -1,7 +1,7 @@
 [project]
 name = "log-digitiser"
 version = "0.1.0"
-description = "Log Digitisation Agent - Automated Petrophysical Well Log Digitisation & Interactive Multi-Track A2UI Visualization for Gemini Enterprise"
+description = "Well Log Digitisation Agent - Automated Petrophysical Well Log Digitisation & Interactive Multi-Track A2UI Visualization for Gemini Enterprise"
 authors = [
     {name = "Amandeep Singh", email = "amandeepsinghs@google.com"},
 ]

@@ -1,4 +1,4 @@
-"""ADK Agent for the Petrophysicist Log Digitisation workflow.
+"""ADK Agent for the Well Log Digitisation workflow.
 
 In : a user prompt, for example 'digitise the Schlumberger scan' or 'show me
      WELL_LOG_SCHLUM'.
@@ -356,6 +356,7 @@ def _remove_datapart_blobs(text: str) -> str:
 
 root_agent = Agent(
     name="log_digitiser",
+    description="Well Log Digitisation Agent - Automated Petrophysical Well Log Digitisation & Interactive Multi-Track A2UI Visualization for Gemini Enterprise",
     model=Gemini(
         model=MODEL,
         retry_options=types.HttpRetryOptions(attempts=3),
@@ -364,7 +365,7 @@ root_agent = Agent(
         max_output_tokens=1024,
     ),
     instruction=(
-        "You are the Petrophysicist Log Digitisation Agent. "
+        "You are the Well Log Digitisation Agent. "
         "You digitise scanned well logs into CWLS/SPWLA LAS 2.0 files and render "
         "interactive multi-track log plots in Gemini Enterprise. "
         "Your data lives in Cloud Storage in asia-south1 (Mumbai).\n\n"

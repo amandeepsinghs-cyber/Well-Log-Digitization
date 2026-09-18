@@ -81,8 +81,8 @@ app: FastAPI = get_fast_api_app(
     otel_to_cloud=otel_to_cloud,
     lifespan=lifespan,
 )
-app.title = "Log Digitisation Agent"
-app.description = "API for interacting with the Log Digitisation Agent"
+app.title = "Well Log Digitisation Agent"
+app.description = "API for interacting with the Well Log Digitisation Agent"
 
 
 # Proxy routes so the Vertex AI Console Playground (reasoning_engine SDK) can

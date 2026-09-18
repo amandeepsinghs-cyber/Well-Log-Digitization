@@ -67,7 +67,7 @@ def emit_and_validate_fixture(surface_id: str = "fixture-well-log-surface-001") 
         {
             "id": "title-text",
             "component": "Text",
-            "text": "Petrophysicist Log Digitisation Agent",
+            "text": "Well Log Digitisation Agent",
             "usageHint": "h2",
         },
         {

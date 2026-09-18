@@ -1,11 +1,11 @@
-# Log Digitisation Agent (v0.1)
+# Well Log Digitisation Agent (v0.1)
 
 > **Autonomous Petrophysical Well Log Digitisation & Interactive Multi-Track A2UI Visualization for Gemini Enterprise**
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Google ADK](https://img.shields.io/badge/Google%20ADK-2.6.2-orange.svg)](https://google.github.io/adk-docs/)
 [![A2UI Protocol](https://img.shields.io/badge/A2UI-v0.9-green.svg)](https://a2ui.org)
-[![Tests](https://img.shields.io/badge/tests-488%20passing-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-489%20passing-brightgreen.svg)]()
 [![CWLS LAS](https://img.shields.io/badge/CWLS-LAS%202.0-blueviolet.svg)]()
 [![Platform](https://img.shields.io/badge/Vertex%20AI-Agent%20Runtime-4285F4.svg)]()
 
@@ -15,7 +15,7 @@
 
 Decades of historical oil and gas exploration records are trapped in physical paper well logs, raster TIFFs, PDFs, and scanned JPEGs. Manual digitisation requires days of tedious cross-track tracing and remains prone to human transcription errors.
 
-The **Log Digitisation Agent** is a production-grade autonomous petrophysicist agent built on the **Google Agent Development Kit (ADK)** and deployed to **Vertex AI Agent Runtime**. Accessible directly from **Gemini Enterprise chat**, it provides an end-to-end, conversational workflow to:
+The **Well Log Digitisation Agent** is a production-grade autonomous petrophysicist agent built on the **Google Agent Development Kit (ADK)** and deployed to **Vertex AI Agent Runtime**. Accessible directly from **Gemini Enterprise chat**, it provides an end-to-end, conversational workflow to:
 
 1. **Inventory & Inspect**: Survey Cloud Storage buckets for un-digitised scanned sheets (JPEG, PNG, PDF) vs. completed LAS files.
 2. **Display Original Scans**: Render high-resolution raster sheets directly inside Gemini Enterprise chat via A2UI base64 components.
